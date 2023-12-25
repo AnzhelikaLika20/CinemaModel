@@ -43,6 +43,7 @@ class JsonCinemaFilmsStorage(private val pathToSerializedStorage: String) : Cine
             ).toMutableList()
         val newFilmId = (listOfFilms.maxOfOrNull { x -> x.id } ?: 0) + 1
         val film = IdentifiedFilmModel(newFilmId, newFilm.title, newFilm.duration, newFilm.ageLimit, newFilm.timeTable)
+        listOfFilms.removeIf{x -> x.id == newFilmId}
         listOfFilms.addLast(film)
         val serializedInfo = Json.encodeToString(listOfFilms)
         storeInfo(serializedInfo)

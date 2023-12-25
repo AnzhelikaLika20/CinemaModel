@@ -23,7 +23,7 @@ class JsonTicketStorage(private val pathToSerializedStorage: String) : CinemaTic
         file.writeText(info)
     }
 
-    override fun addTicket(newticket: TicketModel) {
+    override fun addTicket(newTicket: TicketModel) {
         val infoFromFile = loadInfo()
         val listOfTickets: MutableList<IdentifiedTicketModel> =
             if (infoFromFile.isBlank()) mutableListOf() else Json.decodeFromString<List<IdentifiedTicketModel>>(
@@ -31,7 +31,8 @@ class JsonTicketStorage(private val pathToSerializedStorage: String) : CinemaTic
             ).toMutableList()
         val newTicketId = (listOfTickets.maxOfOrNull { x -> x.id } ?: 0) + 1
         val ticket =
-            IdentifiedTicketModel(newTicketId, newticket.sessionId, newticket.row, newticket.seat, newticket.price)
+            IdentifiedTicketModel(newTicketId, newTicket.sessionId, newTicket.row, newTicket.seat, newTicket.price)
+        listOfTickets.removeIf{x -> x.id == newTicketId}
         listOfTickets.add(ticket)
         val serializedInfo = Json.encodeToString(listOfTickets)
         storeInfo(serializedInfo)

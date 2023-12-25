@@ -259,6 +259,7 @@ class InputManager {
     }
 
     private fun editSeatStatusToTaken() {
+        println("Sessions:\n")
         DI.sessionController.getAllSessions().forEach { session -> println(session.value) }
         val sessionId = getValidSessionId()
         if (sessionId == null) {
@@ -337,7 +338,7 @@ class InputManager {
             return null
         }
     }
-    fun showSoldSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
+    private fun showSoldSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
         conditionCinemaHallSeats ?: return
         for(row in conditionCinemaHallSeats.indices) {
             print("Row $row: [")

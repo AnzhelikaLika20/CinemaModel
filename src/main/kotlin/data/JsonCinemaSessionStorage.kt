@@ -33,6 +33,7 @@ class JsonCinemaSessionStorage(private val pathToSerializedStorage: String) : Ci
         val newSessionTime = session.time
         val newSessionSeats = session.seats
         val newSession = IdentifiedSessionModel(newSessionId, newSessionFilmId, newSessionTime, newSessionSeats)
+        listOfSessions.removeIf{x -> x.id == newSessionId}
         listOfSessions.add(newSession)
         val serializedInfo = Json.encodeToString(listOfSessions)
         storeInfo(serializedInfo)
@@ -56,6 +57,7 @@ class JsonCinemaSessionStorage(private val pathToSerializedStorage: String) : Ci
                 infoFromFile
             ).toMutableList()
         listOfSessions.removeIf { x -> x.id == newSession.id }
+        listOfSessions.removeIf{x -> x.id == newSession.id}
         listOfSessions.add(newSession)
         val serializedInfo = Json.encodeToString(listOfSessions)
         storeInfo(serializedInfo)
