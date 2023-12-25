@@ -46,7 +46,7 @@ class RuntimeCinemaSessionStorage : CinemaSessionStorage{
     }
 
     override fun getFreeSeats(sessionId: Int) : List<Pair<Int, Int>> {
-        val freeSeats : List<Pair<Int, Int>> = listOf()
+        val freeSeats : MutableList<Pair<Int, Int>> = mutableListOf()
         for(row in listOfSessions[sessionId]?.seats!!.conditionCinemaHallSeats.indices) {
             for (seat in listOfSessions[sessionId]?.seats!!.conditionCinemaHallSeats[row].indices) {
                 if (listOfSessions[sessionId]?.seats!!.conditionCinemaHallSeats[row][seat] == SeatCondition.free) {

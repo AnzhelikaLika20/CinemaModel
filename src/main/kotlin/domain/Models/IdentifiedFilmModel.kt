@@ -6,4 +6,9 @@ data class IdentifiedFilmModel (
     var duration: Int,
     var ageLimit :Int,
     var timeTable: CinemaTimetableModel,
-)
+) {
+    override fun toString(): String {
+        val info : String = "id = $id; title = $title, duration = $duration, age limit = $ageLimit"
+        return info
+    }
+}

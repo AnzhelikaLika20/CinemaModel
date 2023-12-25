@@ -6,4 +6,9 @@ class IdentifiedTicketModel (
     val row: Int,
     val seat: Int,
     val price: Int
-)
+) {
+    override fun toString(): String {
+        val info : String = "id = $id; sessionId = $sessionId; row = $row; seat = $seat; price = $price"
+        return info
+    }
+}

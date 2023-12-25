@@ -3,51 +3,123 @@ package presentation
 import di.DI
 import domain.Models.IdentifiedSessionModel
 import domain.Models.SeatCondition
+import kotlinx.datetime.LocalDateTime
 import presentation.Models.OutputModel
 
 class InputManager {
     private fun getMenu() {
         println(
-            "Enter:\n" + "1 - go to film menu\n" + "2 - to change seat status to Taken\n" + "3 - to sell ticket\n" + "4 - to refund ticket to client\n" + "5 - to exit"
+            "Enter:\n" + "1 - go to film menu\n" + "2 - to change seat status to Taken\n" + "3 - to sell ticket\n" + "4 - to refund ticket to client\n" + "5 - to add session\n" + "6 - to look through available sessions\n" + "7 - to exit\n"
         )
     }
 
     private fun getEditFilmMenu() {
         println(
-            "Enter:\n" + "1 - to add film\n" + "2 - to edit film duration\n" + "3 - to edit film title\n" + "4 - to edit film age limit\n" + "5 - to exit from film menu"
+            "Enter:\n" + "1 - to add film\n" + "2 - to edit film duration\n" + "3 - to edit film title\n" + "4 - to edit film age limit\n" + "5 - to add session\n" + "6 - to exit from film menu"
         )
     }
 
-    private fun getValidFilmId(): Int {
+    fun processUserOuterInput() {
+        do {
+            println("-----------------------------------------------------------------")
+            try {
+                getMenu()
+                val clientInput = readlnOrNull() ?: continue
+                when (clientInput.toInt()) {
+                    1 -> editFilmInfo()
+                    2 -> editSeatStatusToTaken()
+                    3 -> sellTicket()
+                    4 -> refundTicket()
+                    5 -> addSession()
+                    6 -> showSessions()
+                    7 -> return
+                    else -> {
+                        throw Exception("Incorrect instruction. Try again!")
+                    }
+                }
+            } catch (ex: NumberFormatException) {
+                println("Incorrect input representation")
+                continue
+            } catch (ex: Exception) {
+                println(ex.message)
+                continue
+            }
+        } while (true)
+    }
+
+    private fun showSessions() {
+        val listOfSessions = DI.sessionController.getAllSessions()
+        if(listOfSessions.isEmpty()) {
+            println("There are no sessions")
+            return
+        }
+        DI.sessionController.getAllSessions().forEach { session -> println(session.value) }
+    }
+
+    private fun editFilmInfo() {
+        println("-----------------------------------------------------------------")
+        do {
+            try {
+                getEditFilmMenu()
+                val filInfoInput = readlnOrNull() ?: continue
+                when (filInfoInput.toInt()) {
+                    1 -> addFilm().also { return }
+                    2 -> editFilmDuration().also { return }
+                    3 -> editFilmTitle().also { return }
+                    4 -> editFilmAgeLimit().also { return }
+                    5 -> return
+                    else -> {
+                        throw Exception("Incorrect instruction. Try again!")
+                    }
+                }
+            } catch (ex: NumberFormatException) {
+                println("Incorrect input representation")
+                continue
+            } catch (ex: Exception) {
+                println(ex.message)
+                continue
+            }
+        } while (true)
+    }
+
+    private fun thereAreAnyFilms(): Boolean {
+        if (DI.filmController.getAllFilms().isEmpty()) {
+            println("There are no films")
+            return true
+        }
+        return false
+    }
+
+    private fun getValidFilmId(): Int? {
         println("Enter the film Id")
         var filmIdInput = readlnOrNull()
-        while (filmIdInput == null || filmIdInput.toIntOrNull() == null || DI.filmController.getAllFilms()
+        if (filmIdInput == null || filmIdInput.toIntOrNull() == null || !DI.filmController.getAllFilms()
                 .containsKey(filmIdInput.toIntOrNull())
         ) {
             println("Invalid Id. Enter the film Id again")
-            filmIdInput = readlnOrNull()
+            return null
         }
         val filmId = filmIdInput.toInt()
         return filmId
     }
 
-    private fun getValidFilmDuration(): Int {
+    private fun getValidFilmDuration(): Int? {
         println("Enter the new film duration in minutes")
         var newFilmDurationInput = readlnOrNull()
-        while (newFilmDurationInput == null || newFilmDurationInput.toIntOrNull() == null || newFilmDurationInput.toInt() < 0) {
+        if (newFilmDurationInput == null || newFilmDurationInput.toIntOrNull() == null || newFilmDurationInput.toInt() < 0) {
             println("Invalid film duration. Enter the film duration again")
-            newFilmDurationInput = readlnOrNull()
+            return null
         }
         val newFilmDuration = newFilmDurationInput.toInt()
         return newFilmDuration
     }
 
-    private fun getValidFilmAgeLimit(): Int {
+    private fun getValidFilmAgeLimit(): Int? {
         println("Enter the new film age limit in minutes")
         var newFilmAgeLimitInput = readlnOrNull()
-        while (newFilmAgeLimitInput == null || newFilmAgeLimitInput.toIntOrNull() == null || newFilmAgeLimitInput.toInt() < 0) {
+        if (newFilmAgeLimitInput == null || newFilmAgeLimitInput.toIntOrNull() == null || newFilmAgeLimitInput.toInt() < 0) {
             println("Invalid film age limit. Enter the film age limit again")
-            newFilmAgeLimitInput = readlnOrNull()
+            return null
         }
         val newFilmAgeLimit = newFilmAgeLimitInput.toInt()
         return newFilmAgeLimit
@@ -65,14 +137,15 @@ class InputManager {
 
     private fun getValidSessionId(): Int? {
         if (DI.sessionController.getAllSessions().isEmpty())
-            return null;
+            return null
+        showSessions()
         println("Enter the session Id")
         var sessionIdInput = readlnOrNull()
-        while (sessionIdInput == null || sessionIdInput.toIntOrNull() == null || DI.sessionController.getAllSessions()
+        if (sessionIdInput == null || sessionIdInput.toIntOrNull() == null || !DI.sessionController.getAllSessions()
                 .containsKey(sessionIdInput.toInt())
         ) {
-            println("Invalid session Id. Enter the session Id")
-            sessionIdInput = readlnOrNull()
+            println("Invalid session Id.")
+            return null
         }
         val newSessionId = sessionIdInput.toInt()
         return newSessionId
@@ -103,11 +176,12 @@ class InputManager {
     }
 
     private fun editFilmTitle() {
-        if (isThereAnyFilms()) return
-        println("List of available films:\n")
-        DI.filmController.getAllFilms().forEach { film -> println(film) }
+        if (thereAreAnyFilms()) return
 
-        val filmId = getValidFilmId()
+        println("List of available films:\n")
+        DI.filmController.getAllFilms().forEach { film -> println(film.value) }
+
+        val filmId = getValidFilmId() ?: return
 
         val newFilmTitleInput = getValidFilmTitle()
 
@@ -115,51 +189,52 @@ class InputManager {
     }
 
     private fun editFilmDuration() {
-        if (isThereAnyFilms()) return
+        if (thereAreAnyFilms()) return
 
         println("List of available films:\n")
 
-        DI.filmController.getAllFilms().forEach { film -> println(film) }
+        DI.filmController.getAllFilms().forEach { film -> println(film.value) }
 
-        val filmId = getValidFilmId()
+        val filmId = getValidFilmId() ?: return
 
-        val newFilmDuration = getValidFilmDuration()
+        val newFilmDuration = getValidFilmDuration() ?: return
 
         DI.filmController.editFilmDuration(filmId, newFilmDuration)
     }
 
-    private fun isThereAnyFilms(): Boolean {
-        if (DI.filmController.getAllFilms().isEmpty()) {
-            println("There is no any films")
-            return true
-        }
-        return false
-    }
-
     private fun editFilmAgeLimit() {
+        if (thereAreAnyFilms()) return
         println("List of available films:\n")
-        DI.filmController.getAllFilms().forEach { film -> println(film) }
+        DI.filmController.getAllFilms().forEach { film -> println(film.value) }
 
-        val filmId = getValidFilmId()
+        val filmId = getValidFilmId() ?: return
 
-        val newFilmDuration = getValidFilmAgeLimit()
+        val newFilmDuration = getValidFilmAgeLimit() ?: return
 
         DI.filmController.editFilmAgeLimit(filmId, newFilmDuration)
     }
 
     private fun addFilm() {
         val title = getValidFilmTitle()
-        val duration = getValidFilmDuration()
-        val ageLimit = getValidFilmAgeLimit()
+        var duration = getValidFilmDuration()
+        while (duration == null) {
+            duration = getValidFilmDuration()
+        }
+        var ageLimit = getValidFilmAgeLimit()
+        while (ageLimit == null) {
+            ageLimit = getValidFilmAgeLimit()
+        }
         DI.filmController.addFilm(title, duration, ageLimit)
     }
 
     private fun getValidTicketId(): Int? {
-        if (DI.ticketController.getAllTickets().isEmpty())
-            return null;
+        if (DI.ticketController.getAllTickets().isEmpty()) {
+            println("There are no tickets")
+            return null
+        }
         println("Enter the Ticket Id")
         var ticketIdInput = readlnOrNull()
-        while (ticketIdInput == null || ticketIdInput.toIntOrNull() == null || DI.ticketController.getAllTickets()
+        while (ticketIdInput == null || ticketIdInput.toIntOrNull() == null || !DI.ticketController.getAllTickets()
                 .containsKey(ticketIdInput.toInt())
         ) {
             println("Invalid ticket Id. Enter the ticket Id")
@@ -169,36 +244,11 @@ class InputManager {
         return ticketId
     }
 
-    private fun editFilmInfo() {
-        println("-----------------------------------------------------------------")
-        getEditFilmMenu()
-        do {
-            try {
-                val filInfoInput = readlnOrNull() ?: continue
-                when (filInfoInput.toInt()) {
-                    1 -> addFilm().also { return }
-                    2 -> editFilmDuration().also { return }
-                    3 -> editFilmTitle().also { return }
-                    4 -> editFilmAgeLimit().also { return }
-                    5 -> return
-                    else -> {
-                        throw Exception("Incorrect instruction. Try again!")
-                    }
-                }
-            } catch (ex: NumberFormatException) {
-                println("Incorrect input representation")
-            } catch (ex: Exception) {
-                println(ex.message)
-            }
-        } while (true)
-    }
-
     private fun editSeatStatusToTaken() {
-        println("-----------------------------------------------------------------")
-        DI.sessionController.getAllSessions().forEach { session -> println(session) }
+        DI.sessionController.getAllSessions().forEach { session -> println(session.value) }
         val sessionId = getValidSessionId()
         if (sessionId == null) {
-            println("There is no any sessions")
+            println("There are no sessions")
             return
         }
         println("Sold seats:\n")
@@ -217,35 +267,60 @@ class InputManager {
     }
 
     private fun refundTicket() {
-        println("-----------------------------------------------------------------")
-        val ticketId = getValidTicketId()
+        val ticketId = getValidTicketId() ?: return
         DI.ticketController.refundTicket(ticketId)
     }
 
     private fun sellTicket() {
-        
+        val sessionId = getValidSessionId() ?: return
+
+        val freeSeats = DI.sessionController.getFreeSeats(sessionId)
+        if(freeSeats.isEmpty()) {
+            println("There are no free seats for this session.")
+            return
+        }
+        freeSeats.forEach { seat -> println("[${seat.first}][${seat.second}]\n") }
+        val row = getValidRow(sessionId)
+        val seat = getValidSeat(sessionId)
+
+        val priceInput = readlnOrNull()
+        if (priceInput == null || priceInput.toIntOrNull() == null || priceInput.toInt() < 0) {
+            return
+        }
+
+        val price = priceInput.toInt()
+        DI.ticketController.sellTicket(sessionId, price, row, seat)
     }
 
-    fun processUserOuterInput() {
-        do {
-            try {
-                getMenu()
-                val clientInput = readlnOrNull() ?: continue
-                when (clientInput.toInt()) {
-                    1 -> editFilmInfo()
-                    2 -> editSeatStatusToTaken()
-                    3 -> sellTicket()
-                    4 -> refundTicket()
-                    5 -> return
-                    else -> {
-                        throw Exception("Incorrect instruction. Try again!")
-                    }
-                }
-            } catch (ex: NumberFormatException) {
-                println("Incorrect input representation")
-            } catch (ex: Exception) {
-                println(ex.message)
-            }
-        } while (true)
+    private fun addSession() {
+        if(thereAreAnyFilms())
+            return
+        println("List of available films:\n")
+        DI.filmController.getAllFilms().forEach { film -> println(film.value) }
+
+        val filmId = getValidFilmId() ?: return
+        val dateTime = getValidDateOfSession() ?: return
+        DI.sessionController.addSession(filmId, dateTime)
+    }
+
+    private fun getValidDateOfSession(): LocalDateTime? {
+        print("Enter date and time of the session in format dd.mm.yyyy hh:mm\n")
+        val dateTimeInput = readlnOrNull() ?: return null
+        try {
+            val (date, time) = dateTimeInput.split(" ")
+            val (day, month, year) = date.split(".").map { x -> x.toInt() }
+            val (hours, minutes) = time.split(":").map { x -> x.toInt() }
+
+            return LocalDateTime(
+                year,
+                month,
+                day,
+                hours,
+                minutes
+            )
+        } catch (ex: Exception) {
+            println("Incorrect data format")
+            return null
+        }
     }
 }

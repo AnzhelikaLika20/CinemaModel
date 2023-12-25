@@ -6,16 +6,16 @@ import domain.Models.IdentifiedSessionModel
 import domain.Models.SeatCondition
 import domain.Models.SessionModel
 import presentation.Models.OutputModel
-import java.time.LocalDateTime
 
 class SessionControllerImpl (private val sessionStorage: CinemaSessionStorage) : SessionController{
-    override fun addSession(filmId: Int, time: LocalDateTime, seats: CinemaHall): OutputModel {
+
+    override fun addSession(filmId: Int, time: kotlinx.datetime.LocalDateTime, seats: CinemaHall): OutputModel {
         val session = SessionModel(filmId, time, seats)
         sessionStorage.addSession(session)
         return OutputModel("Session for film with id = $filmId was successfully created")
     }
 
-    override fun editSessionTime(sessionId: Int, newTime: LocalDateTime): OutputModel {
+    override fun editSessionTime(sessionId: Int, newTime: kotlinx.datetime.LocalDateTime): OutputModel {
         val sessionModel = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session with such Id")
         sessionModel.time = newTime
         sessionStorage.updateSessions(sessionModel)
