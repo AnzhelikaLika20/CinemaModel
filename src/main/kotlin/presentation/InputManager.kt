@@ -10,7 +10,7 @@ import presentation.Models.OutputModel
 class InputManager {
     private fun getMenu() {
         println(
-            "Enter:\n" + "1 - go to film menu\n" + "2 - to change seat status to Taken\n" + "3 - to sell ticket\n" + "4 - to refund ticket to client\n" + "5 - to add session\n" + "6 - to look through available sessions\n" + "7 - to exit\n"
+            "Enter:\n" + "1 - go to film menu\n" + "2 - to change seat status to Taken\n" + "3 - to sell ticket\n" + "4 - to refund ticket to client\n" + "5 - to add session\n" + "6 - to look through available sessions\n" + "7 - to show free seats for the session\n" + "8 - to show sold seats for the sessions\n" + "9 - to exit\n"
         )
     }
 
@@ -33,7 +33,19 @@ class InputManager {
                     4 -> refundTicket()
                     5 -> addSession()
                     6 -> showSessions()
-                    7 -> return
+                    7 -> {
+                        val sessionId = getValidSessionId() ?: continue
+                        val allSeats = DI.sessionController.getSession(sessionId)?.seats?.conditionCinemaHallSeats
+                        println("Free seats:\n")
+                        showFreeSeats(allSeats)
+                    }
+                    8 -> {
+                        val sessionId = getValidSessionId() ?: return
+                        val allSeats = DI.sessionController.getSession(sessionId)?.seats?.conditionCinemaHallSeats
+                        println("Sold seats:\n")
+                        showSoldSeats(allSeats)
+                    }
+                    9 -> return
                     else -> {
                         throw Exception("Incorrect instruction. Try again!")
                     }
@@ -47,7 +59,6 @@ class InputManager {
             }
         } while (true)
     }
-
     private fun showSessions() {
         val listOfSessions = DI.sessionController.getAllSessions()
         if(listOfSessions.isEmpty()) {
@@ -137,8 +148,10 @@ class InputManager {
     }
 
     private fun getValidSessionId(): Int? {
-        if (DI.sessionController.getAllSessions().isEmpty())
+        if (DI.sessionController.getAllSessions().isEmpty()) {
+            println("There are no sessions")
             return null
+        }
         showSessions()
         println("Enter the session Id")
         var sessionIdInput = readlnOrNull()
@@ -169,11 +182,11 @@ class InputManager {
         val maxNumberOfSeats = DI.sessionController.getSession(sessionId)!!.seats.numberOfSeatsOnRow
         var seatInput = readlnOrNull()
         while (seatInput == null || seatInput.toIntOrNull() == null || seatInput.toInt() < 0 || seatInput.toInt() >= maxNumberOfSeats) {
-            println("Invalid row value. Enter the row value again")
+            println("Invalid seat value. Enter the seat value again")
             seatInput = readlnOrNull()
         }
-        val row = seatInput.toInt()
-        return row
+        val seat = seatInput.toInt()
+        return seat
     }
 
     private fun editFilmTitle() {
@@ -254,7 +267,7 @@ class InputManager {
         }
         val allSeats = DI.sessionController.getSession(sessionId)?.seats?.conditionCinemaHallSeats
         println("Sold seats:\n")
-        showFreeSeats(allSeats)
+        showSoldSeats(allSeats)
         val row = getValidRow(sessionId)
         val seat = getValidSeat(sessionId)
         val seatStatus = DI.sessionController.getSession(sessionId)!!.seats.conditionCinemaHallSeats[row][seat]
@@ -282,8 +295,10 @@ class InputManager {
         val row = getValidRow(sessionId)
         val seat = getValidSeat(sessionId)
 
+        println("Enter price for seat")
         val priceInput = readlnOrNull()
         if (priceInput == null || priceInput.toIntOrNull() == null || priceInput.toInt() < 0) {
+            println("Price is not valid.")
             return
         }
 
@@ -335,7 +350,7 @@ class InputManager {
         }
     }
 
-    fun showFreeSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
+    private fun showFreeSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
         conditionCinemaHallSeats ?: return
         for(row in conditionCinemaHallSeats.indices) {
             print("Row $row: [")
