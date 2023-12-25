@@ -1,7 +1,10 @@
 package domain.Models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class SeatCondition {
-    free,
-    purchased,
-    taken,
+    Free,
+    Purchased,
+    Taken,
 }

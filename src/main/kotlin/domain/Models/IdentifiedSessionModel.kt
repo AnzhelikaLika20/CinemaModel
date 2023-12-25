@@ -1,8 +1,9 @@
 package domain.Models
 
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 
-
+@Serializable
 data class IdentifiedSessionModel (
     val id : Int,
     var filmId :Int,

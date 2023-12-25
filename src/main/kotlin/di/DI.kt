@@ -6,14 +6,14 @@ import presentation.InputManager
 
 object DI {
     private val filmsStorage: CinemaFilmsStorage by lazy {
-        RuntimeCinemaFilmsStorage()
+        JsonCinemaFilmsStorage("src/main/resources/FilmStorage.json")
     }
 
     private val ticketStorage: CinemaTicketStorage by lazy {
-        RuntimeTicketStorage()
+        JsonTicketStorage("src/main/resources/TicketStorage.json")
     }
     private val sessionStorage: CinemaSessionStorage by lazy {
-        RuntimeCinemaSessionStorage()
+        JsonCinemaSessionStorage("src/main/resources/SessionStorage.json")
     }
     val filmController : FilmController
         get() = FilmControllerImpl(filmsStorage)

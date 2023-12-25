@@ -1,5 +1,8 @@
 package domain.Models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class IdentifiedFilmModel (
     val id: Int,
     var title: String,

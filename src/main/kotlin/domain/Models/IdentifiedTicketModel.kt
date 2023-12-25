@@ -1,5 +1,8 @@
 package domain.Models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class IdentifiedTicketModel (
     val id: Int,
     val sessionId: Int,

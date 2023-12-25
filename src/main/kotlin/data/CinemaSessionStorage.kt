@@ -9,6 +9,4 @@ interface CinemaSessionStorage {
     fun updateSessions(newSession: IdentifiedSessionModel)
     fun getAllSessions() : MutableMap<Int, IdentifiedSessionModel>
     fun getSessions(sessionId: Int) : IdentifiedSessionModel?
-    fun getSoldSeats(sessionId: Int) : List<Pair<Int, Int>>
-    fun getFreeSeats(sessionId: Int) : List<Pair<Int, Int>>
 }

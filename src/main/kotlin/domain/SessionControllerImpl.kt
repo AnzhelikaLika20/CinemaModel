@@ -32,7 +32,7 @@ class SessionControllerImpl (private val sessionStorage: CinemaSessionStorage) :
     override fun updateSeatConditionSold(sessionId: Int, row: Int, seat: Int): OutputModel {
         val sessionModel = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session with such Id")
         val hallCondition = sessionModel.seats
-        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.purchased
+        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.Purchased
         sessionStorage.updateSessions(sessionModel)
         return OutputModel("Condition of seat [$row][$seat] in session with id = $sessionId changed for Purchased")
     }
@@ -40,7 +40,7 @@ class SessionControllerImpl (private val sessionStorage: CinemaSessionStorage) :
     override fun updateSeatConditionFree(sessionId: Int, row: Int, seat: Int): OutputModel {
         val sessionModel = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session with such Id")
         val hallCondition = sessionModel.seats
-        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.free
+        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.Free
         sessionStorage.updateSessions(sessionModel)
         return OutputModel("Condition of seat [$row][$seat] in session with id = $sessionId changed for Free")
     }
@@ -48,7 +48,7 @@ class SessionControllerImpl (private val sessionStorage: CinemaSessionStorage) :
     override fun updateSeatConditionTaken(sessionId: Int, row: Int, seat: Int): OutputModel {
         val sessionModel = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session with such Id")
         val hallCondition = sessionModel.seats
-        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.purchased
+        hallCondition.conditionCinemaHallSeats[row][seat] = SeatCondition.Taken
         sessionStorage.updateSessions(sessionModel)
         return OutputModel("Condition of seat [$row][$seat] in session with id = $sessionId changed for Taken")
     }
@@ -61,11 +61,4 @@ class SessionControllerImpl (private val sessionStorage: CinemaSessionStorage) :
         return sessionStorage.getSession(sessionId)
     }
 
-    override fun getSoldSeats(sessionId: Int): List<Pair<Int, Int>> {
-        return sessionStorage.getSoldSeats(sessionId)
-    }
-
-    override fun getFreeSeats(sessionId: Int): List<Pair<Int, Int>> {
-        return sessionStorage.getFreeSeats(sessionId)
-    }
 }

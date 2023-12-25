@@ -1,4 +1,5 @@
 plugins {
+    kotlin("plugin.serialization") version "1.9.21"
     kotlin("jvm") version "1.9.21"
 }
 

@@ -4,6 +4,7 @@ import di.DI
 import domain.Models.IdentifiedSessionModel
 import domain.Models.SeatCondition
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.json.Json
 import presentation.Models.OutputModel
 
 class InputManager {
@@ -251,15 +252,16 @@ class InputManager {
             println("There are no sessions")
             return
         }
+        val allSeats = DI.sessionController.getSession(sessionId)?.seats?.conditionCinemaHallSeats
         println("Sold seats:\n")
-        DI.sessionController.getSoldSeats(sessionId).forEach { seat -> println("[$seat.first][${seat.second}]") }
+        showFreeSeats(allSeats)
         val row = getValidRow(sessionId)
         val seat = getValidSeat(sessionId)
         val seatStatus = DI.sessionController.getSession(sessionId)!!.seats.conditionCinemaHallSeats[row][seat]
-        if (seatStatus == SeatCondition.free) {
+        if (seatStatus == SeatCondition.Free) {
             println("This seat was not purchased")
             return
-        } else if (seatStatus == SeatCondition.taken) {
+        } else if (seatStatus == SeatCondition.Taken) {
             println("This seat has been already taken")
             return
         }
@@ -274,12 +276,9 @@ class InputManager {
     private fun sellTicket() {
         val sessionId = getValidSessionId() ?: return
 
-        val freeSeats = DI.sessionController.getFreeSeats(sessionId)
-        if(freeSeats.isEmpty()) {
-            println("There are no free seats for this session.")
-            return
-        }
-        freeSeats.forEach { seat -> println("[${seat.first}][${seat.second}]\n") }
+        val allSeats = DI.sessionController.getSession(sessionId)?.seats?.conditionCinemaHallSeats
+        println("Free seats:\n")
+        showFreeSeats(allSeats)
         val row = getValidRow(sessionId)
         val seat = getValidSeat(sessionId)
 
@@ -321,6 +320,31 @@ class InputManager {
         } catch (ex: Exception) {
             println("Incorrect data format")
             return null
+        }
+    }
+    fun showSoldSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
+        conditionCinemaHallSeats ?: return
+        for(row in conditionCinemaHallSeats.indices) {
+            print("Row $row: [")
+            for (seat in conditionCinemaHallSeats[row].indices) {
+                if (conditionCinemaHallSeats[row][seat] == SeatCondition.Purchased) {
+                    print("$seat ")
+                }
+            }
+            print("]\n")
+        }
+    }
+
+    fun showFreeSeats(conditionCinemaHallSeats : Array<Array<SeatCondition>>?) {
+        conditionCinemaHallSeats ?: return
+        for(row in conditionCinemaHallSeats.indices) {
+            print("Row $row: [")
+            for (seat in conditionCinemaHallSeats[row].indices) {
+                if (conditionCinemaHallSeats[row][seat] == SeatCondition.Free) {
+                    print("$seat ")
+                }
+            }
+            print("]\n")
         }
     }
 }

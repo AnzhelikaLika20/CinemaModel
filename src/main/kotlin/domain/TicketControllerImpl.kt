@@ -7,7 +7,7 @@ import domain.Models.SeatCondition
 import domain.Models.TicketModel
 import presentation.Models.OutputModel
 
-class TicketControllerImpl (val sessionStorage : CinemaSessionStorage, val ticketStorage : CinemaTicketStorage) : TicketController {
+class TicketControllerImpl (private val sessionStorage : CinemaSessionStorage, private val ticketStorage : CinemaTicketStorage) : TicketController {
     override fun sellTicket(sessionId: Int, price: Int, row: Int, seat: Int): OutputModel {
         val session = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session with Id = $sessionId")
         val hallCondition = session.seats.conditionCinemaHallSeats
@@ -15,7 +15,7 @@ class TicketControllerImpl (val sessionStorage : CinemaSessionStorage, val ticke
             return OutputModel("Invalid row, there are ${hallCondition.size} rows ")
         if(seat >= hallCondition[0].size || seat < 0)
             return OutputModel("Invalid seat, there are ${hallCondition[0].size} seats in the row")
-        if(hallCondition[row][seat] != SeatCondition.free)
+        if(hallCondition[row][seat] != SeatCondition.Free)
             return OutputModel("This seat [$row][$seat] is busy")
         val sessionController = SessionControllerImpl(sessionStorage)
         sessionController.updateSeatConditionSold(sessionId, row, seat)
@@ -32,7 +32,7 @@ class TicketControllerImpl (val sessionStorage : CinemaSessionStorage, val ticke
         val seat = ticket.seat
         val session = sessionStorage.getSession(sessionId) ?: return OutputModel("There is no session from the ticket")
         val hallCondition = session.seats.conditionCinemaHallSeats
-        if(hallCondition[row][seat] == SeatCondition.taken)
+        if(hallCondition[row][seat] == SeatCondition.Taken)
             return OutputModel("Seat [$row][$seat] has been already taken and can't be refund")
         ticketStorage.refundTicket(ticketId)
         val sessionController = SessionControllerImpl(sessionStorage)
